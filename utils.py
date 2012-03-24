@@ -34,47 +34,56 @@ class BaseRun:
 class Stat():
 	"""A statstic about a set of runs"""
 
-	availableStats = ['totalnumber','totaltime','totaldistance','totalAverageSpeed','totalAveragePace']
+	availableStats = {'totalnumber':'Number of runs','totalduration':'Duration','averageduration':'Average duration','totaldistance':'Distance','averagedistance':'Average distance','averagespeed':'Average speed','averagepace':'Average pace','lastruninfo':'Last run in comparison'}
 
-	def __init__(self,runz):
+	def __init__(self,runz,name=None):
 
 		self.runz = runz
+		self.name = name
 
 		self.totalnumber = len(self.runz)
-		self.totaltime = Stat.duration(self.runz)
-		self.totaldistance = Stat.distance(self.runz)
-		self.totalAverageSpeed = Stat.averageSpeed(self.runz)
-		self.totalAveragePace = Stat.averagePace(self.runz)
+		self.totalduration = self.duration()
+		self.averageduration = 1.*self.totalduration/self.totalnumber
+		self.totaldistance = self.distance()
+		self.averagedistance = 1.*self.totaldistance/self.totalnumber
+		self.averagespeed = self.averageSpeed()
+		self.averagepace = self.averagePace()
 
-
-	@staticmethod
-	def duration(runz):
+		self.lastruninfo = self.runInfo(self.runz[-1])
+	
+	def runInfo(self,run):
+		'''Returns str info about the last run
+		'''
+		durP = 100.*run.duration/self.averageduration
+		distP = 100.*run.distance/self.averagedistance
+		speedP = 100.*run.speed/self.averagespeed
+		paceP = 100.*run.pace/self.averagepace
+		return "Duration: %s (%2.1f%%) |  Distance: %skm (%2.1f%%) | Speed: %2.3f km/h (%2.1f%%) |  Pace: %2.3f min/km (%2.1f%%)"%(run.prettytime(run.duration),durP,run.distance,distP,run.speed,speedP,run.pace,paceP)
+	def duration(self):
 		'''Total duration of runz passed in parameters
 		'''
-		return sum([r.duration for r in runz])
+		return sum([r.duration for r in self.runz])
 
-	@staticmethod
-	def distance(runz):
+	
+	def distance(self):
 		'''Total duration of runz passed in parameters
 		'''
-		return sum([r.distance for r in runz])
+		return sum([r.distance for r in self.runz])
 
-	@staticmethod
-	def averageSpeed(runz):
+	def averageSpeed(self):
 		'''Average speed of runz passed in parameters
 		'''
-		return 1.*sum([r.totalspeed for r in runz])/len(runz) if not len(runz)==0 else 0
+		return 1.*sum([r.speed for r in self.runz])/len(self.runz) if not len(self.runz)==0 else 0
 
-	@staticmethod
-	def averagePace(runz):
+	def averagePace(self):
 		'''Average page of runz passed in parameters
 		'''
-		return 1.*sum([r.totalpace for r in runz])/len(runz) if not len(runz)==0 else 0
+		return 1.*sum([r.pace for r in self.runz])/len(self.runz) if not len(self.runz)==0 else 0
 
 
 	def __repr__(self):
-		s = ''
-		for stat in self.availableStats:
-			s+= '%s : %s\n'%(stat,self.__dict__[stat])
+		s = '%s\n'%self.name if self.name else ''
+		for stat,desc in self.availableStats.items():
+			s+= '\t%s : %s\n'%(desc,self.__dict__[stat])
 		return s
 

@@ -30,17 +30,17 @@ class Runz(BaseRun):
 		'''Total distance'''
 		self.duration = len(self.distances)*self.timeinterval
 		'''Length of run in seconds'''
-		self.totalpace = self.pace(self.distances)
+		self.pace = self.paceFromDistances(self.distances)
 		'''Pace during run'''
-		self.totalspeed = self.speed(self.distances)
+		self.speed = self.speedFromDistances(self.distances)
 		'''Speed during run'''		
 	
-	def speed(self,distances):
+	def speedFromDistances(self,distances):
 		''' km/h '''
 		time = len(distances)*self.timeinterval/3600.
 		return distances[-1]/time
 
-	def pace(self,distances):
+	def paceFromDistances(self,distances):
 		''' min/km ''' 		
 		time = len(distances)*self.timeinterval/60.
 		if distances[-1]==0:
@@ -52,7 +52,7 @@ class Runz(BaseRun):
 		return '%s\t%s\n'%(datetime.strftime(self.date,timeformat),','.join(['%s'%d for d in self.distances]))
 
 	def __repr__(self):
-		return 'Date: %s | Duration : %7s  |  Distance : %2.3f  |  Speed : %2.3f km/h  |  Pace : %2.3f min/km'%(self.date,self.prettytime(self.duration),self.distance,self.totalspeed,self.totalpace)
+		return 'Date: %s | Duration : %7s  |  Distance : %2.3f  |  Speed : %2.3f km/h  |  Pace : %2.3f min/km'%(self.date,self.prettytime(self.duration),self.distance,self.speed,self.pace)
 
 
 
@@ -64,12 +64,13 @@ class RunCollection(BaseRun):
 		self.podz = podz
 
 		if xmldir:
-			self.xmldirectory = xmldir
+			self.xmldirectory = path.expanduser(xmldir)
 		else:
 			self.xmldirectory = '/Volumes/%s/iPod_Control/Device/Trainer/Workouts/Empeds/nikeinternal/synched/'%self.podz
 
-		self.destfile = path.join(dest,'%s.runz'%self.podz)
-		open(self.destfile,'a')
+		self.destfile = path.expanduser(path.join(dest,'%s.runz'%self.podz))
+		if not path.exists(self.destfile):
+			open(self.destfile,'w').close()
 
 		self.runz = OrderedDict()
 
@@ -93,19 +94,11 @@ class RunCollection(BaseRun):
 				print 'Added new run to %s.runz : %s'%(self.podz,r)
 				self.runz[r.date] = r
 
-		print 'Loaded %s runz from ipod %s.runz'%(len(self.runz)-b,self.podz)
+		print 'Loaded %s runz from ipod %s'%(len(self.runz)-b,self.podz)
 
 
 		self.computeStatistics()
 
-	def computeStatistics(self):
-
-		self.overAllStat = Stat(self.runz.values())
-
-		self.dayStats = {}
-		for day in self.days:
-			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day])
-		
 	
 	def saveRunz(self):
 		'''Stores run collection to disk in a tsv file
@@ -123,7 +116,7 @@ class RunCollection(BaseRun):
 		b = len(self.runz)
 
 		
-		with open(self.destfile,'r') as f:
+		with open(self.destfile,'r+') as f:
 			for line in f:
 				(d,dists) = line.split('\t')
 
@@ -137,3 +130,18 @@ class RunCollection(BaseRun):
 
 		print 'Loaded %s runz from %s.runz'%(len(self.runz)-b,self.podz)
 		
+	def computeStatistics(self):
+
+		self.overAllStat = Stat(self.runz.values(),name='Over all statistics')
+
+		self.dayStats = {}
+		for day in self.days:
+			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day],name='%s statistics'%day)
+		
+
+		self.lastWeek = Stat([r for r in self.runz.values() if (datetime.now()-r.date) < timedelta(days=7)],name='Last week statistics')
+
+
+
+
+
