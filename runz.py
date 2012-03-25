@@ -80,8 +80,6 @@ class RunCollection(Base):
 		# Load ipod runz
 		self.ipodImport()
 
-		# Save runz
-		self.saveRunz()
 
 	def ipodImport(self):
 
@@ -96,10 +94,18 @@ class RunCollection(Base):
 
 				self.newrunz.append(r)
 
-		print 'Loaded %s runz from ipod %s'%(len(self.newrunz),self.podz)
-		for nr in self.newrunz:
-			print '\t%s'%nr
+		if len(self.newrunz)>0:
 
+			print 'Loaded %s new runz from ipod %s'%(len(self.newrunz),self.podz)
+
+			for nr in self.newrunz:
+				print '\t%s'%nr
+
+			# Save runz
+			self.saveRunz()
+
+		else:
+			print 'No new runz from ipod %s'%(self.podz)
 
 		self.computeStatistics()
 
