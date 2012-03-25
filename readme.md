@@ -4,7 +4,7 @@ Utility that collects running data from an iPod and computes simple statistics a
 
 # Basic Usage
 
-First you have to enable disk use of the iPod. That option can be set in the iPod's main screen in iTunes.
+The name of an iPod can't contain white spaces and disk use of the iPod has to be enabled. That option can be set in the iPod's main screen in iTunes.
 
 	from runz import RunCollection
 
@@ -12,10 +12,14 @@ First you have to enable disk use of the iPod. That option can be set in the iPo
 	dest = '~/myruns'
 
 	collz = RunCollection(podz=ipodname,dest=dest)
+	# collz = RunCollection(podz=ipodname,dest=dest,xmldir=xxxxx)
+
 
 	print collz.lastWeek
 
-The run data will be parsed and stored in a plain text file in the _dest_ directory. When executed a second time only new runs will be added to the text file (_'iPodname.runz'_). The last call will display stats about the runs of the 7 previous days.
+If you are not an a mac, you can pass the directory where the running data is stored (on the mac it is _/Volumes/%s/iPod_Control/Device/Trainer/Workouts/Empeds/nikeinternal/synched/_) using the _xmldir_ argument - .
+
+The run data will be parsed and stored in a plain data file (_iPodname.runz_) in the _dest_ directory. When executed a second time only new runs will be added to the data file. The last call will display stats about the runs of the 7 previous days.
 
 	Last week statistics
 		Number of runs : 5
@@ -29,7 +33,7 @@ The run data will be parsed and stored in a plain text file in the _dest_ direct
 		
 # Compare runners
 
-It is possible to compare statistics for different runners. For example, assuming that a data files are available for multiple iPods (_'iPodname1.runz'_ and _'iPodname2.runz'_). 
+It is possible to compare statistics for different runners. For example, assuming that a data files are available for multiple iPods (_iPodname1.runz_ and _iPodname2.runz_). 
 
 	from runz import RunCollection
 	from utils import CompareStat
