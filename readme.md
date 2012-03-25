@@ -17,7 +17,7 @@ The name of an iPod can't contain white spaces and disk use of the iPod has to b
 
 	print collz.lastWeek
 
-If you are not an a mac, you can pass the directory where the running data is stored (on the mac it is _/Volumes/%s/iPod_Control/Device/Trainer/Workouts/Empeds/nikeinternal/synched/_) using the _xmldir_ argument - .
+If you are not an a mac, you can pass the directory where the running data is stored (on the mac it is _/Volumes/iPodName/iPod_Control/Device/Trainer/Workouts/Empeds/nikeinternal/synched/_) using the _xmldir_ argument - .
 
 The run data will be parsed and stored in a plain data file (_iPodname.runz_) in the _dest_ directory. When executed a second time only new runs will be added to the data file. The last call will display stats about the runs of the 7 previous days.
 

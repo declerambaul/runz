@@ -140,7 +140,7 @@ class RunCollection(Base):
 
 		self.dayStats = {}
 		for day in self.days:
-			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day],name='%s statistics'%day,owner=self.podz)
+			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day],name='%s statistics'%day,owner='%s (%s)'%(day,self.podz))
 		
 
 		self.lastWeek = Stat([r for r in self.runz.values() if (datetime.now()-r.date) < timedelta(days=7)],name='Last week statistics',owner=self.podz)
