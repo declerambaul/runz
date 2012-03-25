@@ -1,10 +1,11 @@
 from datetime import datetime,timedelta
 
+import operator
 
 timeformat = '%Y-%m-%dT%H:%M:%S'
 
-class BaseRun:
-	'''A run!'''
+class Base:
+	'''Base class for common methods'''
 
 	days = ['Mo','Tu','We','Th','Fr','Sa','Su',]
 	months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -24,22 +25,35 @@ class BaseRun:
 		'''
 		return (time/3600,(time%3600)/60,time%60)
 
-	def prettytime(self, time):
+	def prettyDuration(self, time):
 		'''Pretty display of time'''
-		(h,m,s) = self.hms(time)
+		(h,m,s) = self.hms(int(time))
 		return '%s%02d:%02d'%( 	'%s:'%h if h!=0 else '', m, s)
 
+	def prettyDistance(self,distance):
+		'''Pretty display of distance'''
+		return '%2.2f km'%distance
+
+	def prettySpeed(self,speed):
+		'''Pretty display of speed'''
+		return '%2.2f km/h'%speed
+
+	def prettyPace(self,pace):
+		'''Pretty display of pace'''
+		return '%2.2f min/km'%pace
 
 
-class Stat():
+
+class Stat(Base):
 	"""A statstic about a set of runs"""
 
-	availableStats = {'totalnumber':'Number of runs','totalduration':'Duration','averageduration':'Average duration','totaldistance':'Distance','averagedistance':'Average distance','averagespeed':'Average speed','averagepace':'Average pace','lastruninfo':'Last run in comparison'}
+	availableStats = {'totalnumber':'Number of runs','totalduration':'Duration','averageduration':'Average duration','totaldistance':'Distance','averagedistance':'Average distance','averagespeed':'Average speed','averagepace':'Average pace'}
 
-	def __init__(self,runz,name=None):
+	def __init__(self,runz,name=None,owner=None):
 
 		self.runz = runz
 		self.name = name
+		self.owner = owner
 
 		self.totalnumber = len(self.runz)
 		self.totalduration = self.duration()
@@ -58,7 +72,8 @@ class Stat():
 		distP = 100.*run.distance/self.averagedistance
 		speedP = 100.*run.speed/self.averagespeed
 		paceP = 100.*run.pace/self.averagepace
-		return "Duration: %s (%2.1f%%) |  Distance: %skm (%2.1f%%) | Speed: %2.3f km/h (%2.1f%%) |  Pace: %2.3f min/km (%2.1f%%)"%(run.prettytime(run.duration),durP,run.distance,distP,run.speed,speedP,run.pace,paceP)
+		return "Duration: %s (%2.1f%%) |  Distance: %s (%2.1f%%) | Speed: %s (%2.1f%%) |  Pace: %s (%2.1f%%)"%(self.prettyDuration(run.duration),durP,run.prettyDistance(run.distance),distP,run.prettySpeed(run.speed),speedP,run.prettyPace(run.pace),paceP)
+
 	def duration(self):
 		'''Total duration of runz passed in parameters
 		'''
@@ -80,10 +95,84 @@ class Stat():
 		'''
 		return 1.*sum([r.pace for r in self.runz])/len(self.runz) if not len(self.runz)==0 else 0
 
+	def __repr__(self):
+		sep = '\t'
+		format = '%s%s : %s\n'
+
+		ret = '%s\n'%self.name if self.name else ''
+
+		ret += format%(sep,self.availableStats['totalnumber'],self.totalnumber)
+
+		ret += format%(sep,self.availableStats['totalduration'],self.prettyDuration(self.totalduration))
+
+		ret += format%(sep,self.availableStats['averageduration'],self.prettyDuration(self.averageduration))
+		
+		ret += format%(sep,self.availableStats['totaldistance'],self.
+			prettyDistance(self.totaldistance))
+
+		ret += format%(sep,self.availableStats['averagedistance'],self.
+			prettyDistance(self.averagedistance))
+
+		ret += format%(sep,self.availableStats['averagespeed'],self.
+			prettySpeed(self.averagespeed))
+
+		ret += format%(sep,self.availableStats['averagepace'],self.
+			prettyPace(self.averagepace))
+
+
+		# s = '%s\n'%self.name if self.name else ''
+		# for stat,desc in self.availableStats.items():
+		# 	s+= '\t%s : %s\n'%(desc,self.__dict__[stat])
+
+		return ret
+
+
+
+class CompareStat(Base):
+	'''Compares and ranks a collection of Stat objects
+	'''	
+	def __init__(self,statList):
+		'''Compare a list of stats'''
+
+		self.comp = {}
+
+		if len(set([s.name for s in statList]))==1:
+			self.name = statList[0].name
+		else:
+			self.name = ','.join(['%s:%s'%(s.owner,s.name) for s in statList])
+
+
+		for astat in Stat.availableStats:
+			
+			self.comp[astat] = sorted([(stat.owner, stat.__dict__[astat]) for stat in statList], key=operator.itemgetter(1),reverse=True)
 
 	def __repr__(self):
-		s = '%s\n'%self.name if self.name else ''
-		for stat,desc in self.availableStats.items():
-			s+= '\t%s : %s\n'%(desc,self.__dict__[stat])
-		return s
+
+		sep = '\t'
+		format = '%s:\n%s'
+
+		def ranking(d):
+			pass
+
+
+		ret = '%s\n%s\n'%(self.name,'-'*len(self.name))
+
+
+		ret += format%(Stat.availableStats['totalnumber'],''.join(['\t%s: %s\n'%(o,v) for o,v in self.comp['totalnumber']]))
+
+
+		ret += format%(Stat.availableStats['totalduration'],''.join(['\t%s: %s\n'%(o,self.prettyDuration(v)) for o,v in self.comp['totalduration']]))
+
+		ret += format%(Stat.availableStats['averageduration'],''.join(['\t%s: %s\n'%(o,self.prettyDuration(v)) for o,v in self.comp['averageduration']]))
+
+		ret += format%(Stat.availableStats['totaldistance'],''.join(['\t%s: %s\n'%(o,self.prettyDistance(v)) for o,v in self.comp['totaldistance']]))
+
+		ret += format%(Stat.availableStats['averagedistance'],''.join(['\t%s: %s\n'%(o,self.prettyDistance(v)) for o,v in self.comp['averagedistance']]))
+
+		ret += format%(Stat.availableStats['averagespeed'],''.join(['\t%s: %s\n'%(o,self.prettySpeed(v)) for o,v in self.comp['averagespeed']]))
+		
+		return ret
+
+		
+
 

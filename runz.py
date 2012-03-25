@@ -4,10 +4,10 @@ from collections import OrderedDict
 
 
 from run_xml import RunParser,DirParser
-from utils import BaseRun,Stat,timeformat
+from utils import Base,Stat,timeformat
 
 
-class Runz(BaseRun):
+class Runz(Base):
 	'''A run!'''
 
 	def __init__(self,distances,date):
@@ -52,11 +52,11 @@ class Runz(BaseRun):
 		return '%s\t%s\n'%(datetime.strftime(self.date,timeformat),','.join(['%s'%d for d in self.distances]))
 
 	def __repr__(self):
-		return 'Date: %s | Duration : %7s  |  Distance : %2.3f  |  Speed : %2.3f km/h  |  Pace : %2.3f min/km'%(self.date,self.prettytime(self.duration),self.distance,self.speed,self.pace)
+		return 'Date: %s | Duration : %7s  |  Distance : %s  |  Speed : %s  |  Pace : %s'%(self.date,self.prettyDuration(self.duration),self.prettyDistance(self.distance),self.prettySpeed(self.speed),self.prettyPace(self.pace))
 
 
 
-class RunCollection(BaseRun):
+class RunCollection(Base):
 	'''Stores a collection of runs'''
 
 	def __init__(self,podz,dest,xmldir=None):
@@ -85,16 +85,20 @@ class RunCollection(BaseRun):
 
 	def ipodImport(self):
 
-		b = len(self.runz)
+		self.newrunz = []
 
 		for data in DirParser(self.xmldirectory).parse():
 			r = Runz(**data)
 
 			if r.date not in self.runz:
-				print 'Added new run to %s.runz : %s'%(self.podz,r)
+				# print 'Added new run to %s.runz : %s'%(self.podz,r)
 				self.runz[r.date] = r
 
-		print 'Loaded %s runz from ipod %s'%(len(self.runz)-b,self.podz)
+				self.newrunz.append(r)
+
+		print 'Loaded %s runz from ipod %s'%(len(self.newrunz),self.podz)
+		for nr in self.newrunz:
+			print '\t%s'%nr
 
 
 		self.computeStatistics()
@@ -112,10 +116,9 @@ class RunCollection(BaseRun):
 	def loadRunz(self):
 		'''Stores run collection to disk in a tsv file
 		'''
-
+		
 		b = len(self.runz)
 
-		
 		with open(self.destfile,'r+') as f:
 			for line in f:
 				(d,dists) = line.split('\t')
@@ -129,18 +132,20 @@ class RunCollection(BaseRun):
 					self.runz[r.date] = r
 
 		print 'Loaded %s runz from %s.runz'%(len(self.runz)-b,self.podz)
+
 		
 	def computeStatistics(self):
 
-		self.overAllStat = Stat(self.runz.values(),name='Over all statistics')
+		self.overAllStat = Stat(self.runz.values(),name='Over all statistics',owner=self.podz)
 
 		self.dayStats = {}
 		for day in self.days:
-			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day],name='%s statistics'%day)
+			self.dayStats[day] = Stat([r for r in self.runz.values() if r.day==day],name='%s statistics'%day,owner=self.podz)
 		
 
-		self.lastWeek = Stat([r for r in self.runz.values() if (datetime.now()-r.date) < timedelta(days=7)],name='Last week statistics')
+		self.lastWeek = Stat([r for r in self.runz.values() if (datetime.now()-r.date) < timedelta(days=7)],name='Last week statistics',owner=self.podz)
 
+		self.lastMonth = Stat([r for r in self.runz.values() if (datetime.now()-r.date) < timedelta(days=30)],name='Last month statistics',owner=self.podz)
 
 
 
