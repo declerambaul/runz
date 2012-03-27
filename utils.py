@@ -1,6 +1,7 @@
 from datetime import datetime,timedelta
 
 import operator
+import smtplib
 
 timeformat = '%Y-%m-%dT%H:%M:%S'
 
@@ -175,4 +176,32 @@ class CompareStat(Base):
 
 		
 
+class Notify:
+		
+	SMTP_SERVER = 'smtp.gmail.com'
+	SMTP_PORT = 587
+	 
+	def __init__(self,email,pw):
+		self.email = email
+		self.pw = pw
 
+	def send(self,rec,msg):
+
+		subject = 'Running stats'
+
+		headers = '\n'.join(["From: " + self.email, "Subject: %s"%subject, "To: %s"%rec, "MIME-Version: 1.0", "Content-Type: text/html"])
+
+	
+	 
+		session = smtplib.SMTP(self.SMTP_SERVER, self.SMTP_PORT)
+	 
+		session.ehlo()
+		session.starttls()
+		session.ehlo
+		session.login(self.email, self.pw)
+
+		text = '%s\n\n%s'%(headers,msg)
+	 
+		session.sendmail(self.email, rec, text)
+		session.quit()
+		
