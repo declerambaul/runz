@@ -125,6 +125,7 @@ class RunCollection(Base):
 		
 		b = len(self.runz)
 
+
 		with open(self.destfile,'r+') as f:
 			for line in f:
 				(d,dists) = line.split('\t')

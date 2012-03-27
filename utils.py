@@ -5,6 +5,7 @@ import smtplib
 
 timeformat = '%Y-%m-%dT%H:%M:%S'
 
+
 class Base:
 	'''Base class for common methods'''
 
@@ -152,10 +153,6 @@ class CompareStat(Base):
 		sep = '\t'
 		format = '%s:\n%s'
 
-		def ranking(d):
-			pass
-
-
 		ret = '%s\n%s\n'%(self.name,'-'*len(self.name))
 
 
@@ -189,9 +186,9 @@ class Notify:
 
 		recipients = ','.join(recs)
 
-		subject = 'Running stats'
+		subject = 'Running stats - %s'%datetime.strftime(datetime.now(),'%Y-%m-%d')
 
-		headers = '\n'.join(["From: " + self.email, "Subject: %s"%subject, "To: %s"%recipients, "MIME-Version: 1.0", "Content-Type: text/html"])
+		headers = '\n'.join(["From: " + self.email, "Subject: %s"%subject, "To: %s"%recipients, "MIME-Version: 1.0", "Content-Type: text/plain"])
 
 	
 	 
