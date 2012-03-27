@@ -185,11 +185,13 @@ class Notify:
 		self.email = email
 		self.pw = pw
 
-	def send(self,rec,msg):
+	def send(self,recs,msg):
+
+		recipients = ','.join(recs)
 
 		subject = 'Running stats'
 
-		headers = '\n'.join(["From: " + self.email, "Subject: %s"%subject, "To: %s"%rec, "MIME-Version: 1.0", "Content-Type: text/html"])
+		headers = '\n'.join(["From: " + self.email, "Subject: %s"%subject, "To: %s"%recipients, "MIME-Version: 1.0", "Content-Type: text/html"])
 
 	
 	 
@@ -202,6 +204,5 @@ class Notify:
 
 		text = '%s\n\n%s'%(headers,msg)
 	 
-		session.sendmail(self.email, rec, text)
+		session.sendmail(self.email, recipients, text)
 		session.quit()
-		
