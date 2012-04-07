@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 
 from run_xml import RunParser,DirParser
-from utils import Base,Stat,timeformat
+from utils import Base,Stat,timeformat,pretty_timeformat
 
 
 class Runz(Base):
@@ -52,7 +52,7 @@ class Runz(Base):
 		return '%s\t%s\n'%(datetime.strftime(self.date,timeformat),','.join(['%s'%d for d in self.distances]))
 
 	def __repr__(self):
-		return 'Date: %s | Duration : %7s  |  Distance : %s  |  Speed : %s  |  Pace : %s'%(self.date,self.prettyDuration(self.duration),self.prettyDistance(self.distance),self.prettySpeed(self.speed),self.prettyPace(self.pace))
+		return '%s | %7s | %8s | %6s| %6s'%(datetime.strftime(self.date,pretty_timeformat),self.prettyDuration(self.duration),self.prettyDistance(self.distance),self.prettySpeed(self.speed),self.prettyPace(self.pace))
 
 
 
