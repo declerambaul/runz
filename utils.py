@@ -4,7 +4,7 @@ import operator
 import smtplib
 
 timeformat = '%Y-%m-%dT%H:%M:%S'
-pretty_timeformat = '%s %d-%b-%y %H:%M'
+pretty_timeformat = '%a %d-%b-%y %H:%M'
 
 
 class Base:
